@@ -1,2 +1,5 @@
 venv/
 env/
+obj/
+bin/
+token.txt
