@@ -45,33 +45,7 @@ namespace SofiBot
             // .AddSingleton<CommandListeners>()
             // .AddScoped<ReactionContext>()
 
-
             commandHandler = ActivatorUtilities.CreateInstance<CommandHandler>(services);
-
-
-
-            var pwd = services.GetRequiredService<ShellCommand>().Run("pwd");
-            Console.WriteLine($"pwd result: {pwd}");
-
-
-            var photoJson = services.GetRequiredService<ShellCommand>()
-                .Run("./venv/bin/python -m osxphotos query --album \"Sofi\" --shared --json");
-            Console.WriteLine($"photos: {photoJson}");
-
-            var photoCollection = PhotoCollection.Deserialize(photoJson);
-            Console.WriteLine($"parsed photos, first photo: {photoCollection.Photos[0].path}");
-
-            string exportPath = "exported-photos";
-            Directory.CreateDirectory(exportPath);
-            var photoExport = services.GetRequiredService<ShellCommand>()
-            .Run($"./venv/bin/python -m osxphotos export --update --uuid {photoCollection.Photos[0].uuid} --convert-to-jpeg --jpeg-quality 0.9 --jpeg-ext jpg --download-missing --verbose {exportPath}");
-
-            var exportedFile = Path.GetFullPath($"{exportPath}/{photoCollection.Photos[0].ExportedFilename}");
-
-            if (!File.Exists(exportedFile))
-            {
-                throw new FileNotFoundException(exportedFile);
-            }
         }
 
         public async Task MainAsync()

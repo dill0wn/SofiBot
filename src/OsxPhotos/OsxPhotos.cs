@@ -80,7 +80,7 @@ namespace OsxPhotos
         public string uti_raw { get; set; }
         public string uuid { get; set; }
         public int width { get; set; }
-        public object ExportedFilename
+        public string ExportedFilename
         {
             get
             {

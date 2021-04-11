@@ -1,16 +1,20 @@
+using System;
 using System.Diagnostics;
 
 namespace SofiBot
 {
     public class ShellCommand
     {
-        public string Run(string cmd)
+        public string Run(string cmd, bool logResult = false)
         {
+            Console.WriteLine($"ShellCommand.Run: '{cmd}'");
             var escapedCmd = cmd.Replace("\"", "\\\"");
 
-            var process = new Process()
+            string result = null;
+
+            using (var process = new Process())
             {
-                StartInfo = new ProcessStartInfo
+                process.StartInfo = new ProcessStartInfo
                 {
                     FileName = "/bin/bash",
                     Arguments = $"-c \"{escapedCmd}\"",
@@ -19,17 +23,20 @@ namespace SofiBot
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     // WorkingDirectory = "",
+                };
+
+                if (!process.Start())
+                {
+                    throw new System.Exception("wouldn't start");
                 }
-            };
 
-            if (!process.Start())
-            {
-                throw new System.Exception("wouldn't start");
+                result = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
             }
-            
-            string result = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-
+            if (logResult)
+            {
+                Console.WriteLine($"ShellCommand.Result: '{result}'");
+            }
             return result;
         }
     }
