@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using OsxPhotos;
 
 namespace SofiBot
 {
@@ -36,12 +37,29 @@ namespace SofiBot
             services = new ServiceCollection()
                 .AddSingleton(client)
                 .AddSingleton(commandService)
+                .AddTransient<ShellCommand>()
+                .BuildServiceProvider();
+
+                // unused
                 // .AddSingleton<ViewFactory>()
                 // .AddSingleton<CommandListeners>()
                 // .AddScoped<ReactionContext>()
-                .BuildServiceProvider();
+
 
             commandHandler = ActivatorUtilities.CreateInstance<CommandHandler>(services);
+
+
+
+            var pwd = services.GetRequiredService<ShellCommand>().Run("pwd");
+            Console.WriteLine($"pwd result: {pwd}");
+
+            
+            var photoJson = services.GetRequiredService<ShellCommand>()
+                .Run("./venv/bin/python -m osxphotos query --album \"Sofi\" --shared --json");
+            Console.WriteLine($"photos: {photoJson}");
+
+            var photoCollection = PhotoCollection.Deserialize(photoJson);
+            Console.WriteLine($"parsed photos, first photo: {photoCollection.Photos[0].path}");
         }
 
         public async Task MainAsync()
