@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 
 namespace OsxPhotos
@@ -79,5 +80,13 @@ namespace OsxPhotos
         public string uti_raw { get; set; }
         public string uuid { get; set; }
         public int width { get; set; }
+        public object ExportedFilename
+        {
+            get
+            {
+                var exported = Path.GetFileNameWithoutExtension(this.original_filename);
+                return exported + ".jpg";
+            }
+        }
     }
 }
