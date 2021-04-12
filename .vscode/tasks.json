@@ -19,9 +19,11 @@
             "type": "process",
             "args": [
                 "publish",
+                "-c", "Release",
+                "--self-contained", "true",
                 "${workspaceFolder}/SofiBot.csproj",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "/consoleloggerparameters:NoSummary",
             ],
             "problemMatcher": "$msCompile"
         },
