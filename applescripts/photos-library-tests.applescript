@@ -32,7 +32,7 @@ function run(argv) {
 	const tmpPath = Path("/tmp/sofi");
 	//console.log(`tmp thing ${tmpPath}`);
 	
-	const result = Photos.export([thephoto], {to: tmpPath, useOriginals: false})
+	const result = Photos.export([thephoto], {to: tmpPath, usingOriginals: true})
 
 	const dest = Path(tmpPath + "/" + thephoto.filename());
 	return dest;
