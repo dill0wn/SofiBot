@@ -44,43 +44,48 @@ namespace SofiBot.Commands
             }
         }
 
+        [Command("refresh", RunMode = RunMode.Async)]
+        [Summary("Reloads Photo list")]
+        public async Task RefreshDatabase()
+        {
+            var photos = services.GetRequiredService<OsxPhotoService>();
+            photos.Reload();
+            var message = await Context.Message.ReplyAsync("Photo list refreshed");
+        }
+
         [Command("random", RunMode = RunMode.Async)]
         [Summary("Posts a Photo of Sofi.")]
         public async Task GetRandomSofiAsync()
         {
-            Stopwatch overall = Stopwatch.StartNew();
-            Stopwatch timer = new Stopwatch();
-            timer.Start();
+            var photos = services.GetRequiredService<OsxPhotoService>();
+            var length = photos.PhotoCollection.Photos.Count;
 
-            Console.WriteLine("[Stopwatch] Starting 'query'");
-            var photoJson = services.GetRequiredService<ShellCommand>()
-                .Run("./venv/bin/python -m osxphotos query --album \"Sofi\" --shared --json");
-            Console.WriteLine($"[Stopwatch] 'query' took: {timer.Elapsed}");
+            if (length < 1)
+            {
+                var message = await Context.Message.ReplyAsync("Photo list is like super empty, bro. Try running 'refresh'");
+                return;
+            }
 
-            timer.Restart();
-            Console.WriteLine("[Stopwatch] Starting 'deserialize'");
-            var photoCollection = PhotoCollection.Deserialize(photoJson);
-            Console.WriteLine($"[Stopwatch] 'deserialize' took: {timer.Elapsed}");
+            var random = new Random();
+            var i = random.Next(length);
+            var photo = photos.PhotoCollection.Photos[i];
 
-            var photo = photoCollection.Photos[0];
-
-            Console.WriteLine($"parsed photos, first photo: {photo.path}");
+            Console.WriteLine($"Picked random photo {i} out of {length} photos: {photo.path}");
 
             string exportPath = "exported-photos";
             Directory.CreateDirectory(exportPath);
-            timer.Restart();
+
             Console.WriteLine("[Stopwatch] Starting 'export'");
             var exportOpts = new string[]{
                 $"--update",
                 $"--uuid {photo.uuid}",
-                // "--convert-to-jpeg --jpeg-quality 0.9 --jpeg-ext jpg",
+                "--convert-to-jpeg --jpeg-quality 0.9 --jpeg-ext jpg",
                 "--download-missing",
                 "--verbose",
                 exportPath
             };
             var photoExport = services.GetRequiredService<ShellCommand>()
             .Run($"./venv/bin/python -m osxphotos export {string.Join(" ", exportOpts)}");
-            Console.WriteLine($"[Stopwatch] 'export' took: {timer.Elapsed}");
 
             string fileName = photo.ExportedFilename;
             var exportedFile = Path.GetFullPath($"{exportPath}/{photo.ExportedFilename}");
@@ -89,28 +94,20 @@ namespace SofiBot.Commands
             {
                 throw new FileNotFoundException(exportedFile);
             }
+            Console.WriteLine($"Exported file {exportedFile}, sending...");
 
             using (var stream = File.OpenRead(exportedFile))
             {
-                // upload/embed image https://stackoverflow.com/a/51010769
-
                 var embed = new EmbedBuilder()
                        .WithTitle("It's Sofi!")
                        .WithDescription("This is a photo of sofi")
                        .WithColor(0x0000ff)
-                       .WithImageUrl($"attachment://{fileName}");
+                       .WithImageUrl($"attachment://{fileName}")
+                       ;
 
-                timer.Restart();
-                Console.WriteLine("[Stopwatch] Starting 'upload'");
-                // send message
-                // FIXME: catch > 8MB error and send error message
-                // FIXME: .HEIC files seem to trigger silent error, libheif and 
                 var message = await Context.Channel.SendFileAsync(stream, fileName, embed: embed.Build(), messageReference: Context.Message.Reference);
-                Console.WriteLine($"[Stopwatch] 'upload' took: {timer.Elapsed}");
-
                 Console.WriteLine($"Embedded image to {message.Channel.Id}, {message.Author.Id}, {message.GetJumpUrl()}");
             }
-            Console.WriteLine($"[Stopwatch] 'overall' took: {overall.Elapsed}");
 
             await Task.CompletedTask;
         }

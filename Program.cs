@@ -37,6 +37,7 @@ namespace SofiBot
             services = new ServiceCollection()
                 .AddSingleton(client)
                 .AddSingleton(commandService)
+                .AddSingleton<OsxPhotoService>()
                 .AddTransient<ShellCommand>()
                 .BuildServiceProvider();
 

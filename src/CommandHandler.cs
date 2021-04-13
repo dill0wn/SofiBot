@@ -24,6 +24,7 @@ namespace SofiBot
             commands.Log += CommandLog;
             commands.CommandExecuted += CommandExecuted;
         }
+        
         public async Task InstallCommandsAsync()
         {
             client.MessageReceived += HandleCommandAsync;
@@ -54,13 +55,14 @@ namespace SofiBot
 
         private Task CommandExecuted(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
-            var executeResult = (ExecuteResult)result;
-            if (executeResult.Exception != null)
+            if (result is ExecuteResult executeResult)
             {
-                throw executeResult.Exception;
+                if (executeResult.Exception != null)
+                {
+                    throw executeResult.Exception;
+                }
             }
             return Task.CompletedTask;
         }
-
     }
 }
