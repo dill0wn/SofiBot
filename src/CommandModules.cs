@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -55,10 +56,36 @@ namespace SofiBot.Commands
 
         [Command("random", RunMode = RunMode.Async)]
         [Summary("Posts a Photo of Sofi.")]
-        public async Task GetRandomSofiAsync()
+        public async Task GetRandomSofiAsync(params string[] commentKeywords)
         {
-            var photos = services.GetRequiredService<OsxPhotoService>();
-            var length = photos.PhotoCollection.Photos.Count;
+            var photoService = services.GetRequiredService<OsxPhotoService>();
+            // NOTE: comments work pretty much immediately
+            // FIXME: make this nonsense work
+            string matchingKeyword = null;
+            List<Photo> photos = photoService.PhotoCollection.Photos.Where(photo => photo.isphoto).ToList();
+            if (commentKeywords.Length > 0)
+            {
+                photos = photoService.PhotoCollection.Photos.Where(photo =>
+                {
+                    return photo.comments.Any(comment =>
+                    {
+                        return commentKeywords.Any(keyword =>
+                        {
+                            if (comment.text.Contains(keyword))
+                            {
+                                matchingKeyword = keyword;
+                                return true;
+                            };
+                            return false;
+                        });
+                    });
+                }).ToList();
+            }
+
+            // FIXME: exclude .MOVs
+            Console.WriteLine($"Found {photos.Count} photos that matched keywords {commentKeywords}");
+
+            var length = photos.Count;
 
             if (length < 1)
             {
@@ -68,7 +95,7 @@ namespace SofiBot.Commands
 
             var random = new Random();
             var i = random.Next(length);
-            var photo = photos.PhotoCollection.Photos[i];
+            var photo = photos[i];
 
             Console.WriteLine($"Picked random photo {i} out of {length} photos: {photo.path}");
 
@@ -98,9 +125,22 @@ namespace SofiBot.Commands
 
             using (var stream = File.OpenRead(exportedFile))
             {
+                var embedFields = new List<EmbedFieldBuilder>();
+                if (commentKeywords.Length > 0)
+                {
+                    embedFields.Add(new EmbedFieldBuilder { Name = "Keyword(s)", Value = string.Join(", ", commentKeywords) });
+                    embedFields.Add(new EmbedFieldBuilder { Name = "Photos Matching Keyword(s)", Value = photos.Count().ToString() });
+                }
+                else
+                {
+
+                }
+                // embedFields.Add( new EmbedFieldBuilder { Name = "Filename", Value = photo.original_filename });
+                embedFields.Add(new EmbedFieldBuilder { Name = "Comments", Value = StringifyComments(photo.comments) });
                 var embed = new EmbedBuilder()
-                       .WithTitle("It's Sofi!")
+                       .WithTitle("Hey look! It's Sofi!")
                        .WithDescription("This is a photo of sofi")
+                       .WithFields(embedFields)
                        .WithColor(0x0000ff)
                        .WithImageUrl($"attachment://{fileName}")
                        ;
@@ -110,6 +150,11 @@ namespace SofiBot.Commands
             }
 
             await Task.CompletedTask;
+        }
+
+        private string StringifyComments(IEnumerable<PhotoComment> comments)
+        {
+            return "TBA";
         }
     }
 }

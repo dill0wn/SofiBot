@@ -21,7 +21,7 @@ namespace OsxPhotos
     {
         public string[] albums { get; set; }
         public bool burst { get; set; }
-        // public string[] comments {get;set;}
+        public PhotoComment[] comments {get;set;}
         public DateTime date { get; set; }
         public DateTime? date_modified { get; set; }
         public string description { get; set; }
@@ -88,5 +88,13 @@ namespace OsxPhotos
                 return exported + ".jpg";
             }
         }
+    }
+
+    public class PhotoComment
+    {
+        public string user { get; set; }
+        public string text { get; set; }
+        public bool ismine { get; set; }
+        public DateTime datetime { get; set; }
     }
 }
