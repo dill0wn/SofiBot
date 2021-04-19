@@ -54,7 +54,7 @@ namespace SofiBot.Commands
             var message = await Context.Message.ReplyAsync("Photo list refreshed");
         }
 
-        [Command("random", RunMode = RunMode.Async)]
+        [Command("photo", RunMode = RunMode.Async)]
         [Summary("Posts a Photo of Sofi.")]
         public async Task GetRandomSofiAsync(params string[] commentKeywords)
         {
