@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.dill0wn.sofibot</string>
+	<key>WorkingDirectory</key>
+	<string>/Users/$USERNAME/path/to/SofiBot</string>
+	<key>ProgramArguments</key>
+	<array><string>/Users/$USERNAME/path/to/SofiBot/bin/Release/netcoreapp3.1/osx-x64/publish/SofiBot</string></array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+
+	<key>StandardOutPath</key>
+	<string>/Users/$USERNAME/Library/Logs/com.dill0wn.sofibot.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/$USERNAME/Library/Logs/com.dill0wn.sofibot.log</string>
+</dict>
+</plist>

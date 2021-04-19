@@ -21,6 +21,7 @@
                 "publish",
                 "-c", "Release",
                 "--self-contained", "true",
+                "-r", "osx-x64",
                 "${workspaceFolder}/SofiBot.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary",
