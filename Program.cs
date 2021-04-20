@@ -62,7 +62,8 @@ namespace SofiBot
         private async Task JoinedGuild(SocketGuild guild)
         {
             Console.WriteLine($"Guild Event {guild}");
-            await guild.DefaultChannel.SendMessageAsync("Hello World!");
+            // await guild.DefaultChannel.SendMessageAsync("Hello World!");
+            await Task.CompletedTask;
         }
 
         private async Task Log(LogMessage msg)

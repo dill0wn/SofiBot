@@ -49,18 +49,19 @@ namespace SofiBot.Commands
         [Summary("Reloads Photo list")]
         public async Task RefreshDatabase()
         {
+            var message = await Context.Message.ReplyAsync("Refreshing...");
             var photos = services.GetRequiredService<OsxPhotoService>();
             photos.Reload();
-            var message = await Context.Message.ReplyAsync("Photo list refreshed");
+            await message.ReplyAsync($"Refreshed. There are now {photos.PhotoCollection.Photos.Count} photos.");
         }
 
         [Command("photo", RunMode = RunMode.Async)]
         [Summary("Posts a Photo of Sofi.")]
         public async Task GetRandomSofiAsync(params string[] commentKeywords)
         {
+            var placeholder =  Context.Message.ReplyAsync("Picking a photo... This may take a moment.");
             var photoService = services.GetRequiredService<OsxPhotoService>();
-            // NOTE: comments work pretty much immediately
-            // FIXME: make this nonsense work
+            await placeholder;
             string matchingKeyword = null;
             List<Photo> photos = photoService.PhotoCollection.Photos.Where(photo => photo.isphoto).ToList();
             if (commentKeywords.Length > 0)
@@ -82,7 +83,6 @@ namespace SofiBot.Commands
                 }).ToList();
             }
 
-            // FIXME: exclude .MOVs
             Console.WriteLine($"Found {photos.Count} photos that matched keywords {commentKeywords}");
 
             var length = photos.Count;
@@ -135,11 +135,11 @@ namespace SofiBot.Commands
                 {
 
                 }
-                // embedFields.Add( new EmbedFieldBuilder { Name = "Filename", Value = photo.original_filename });
-                embedFields.Add(new EmbedFieldBuilder { Name = "Comments", Value = StringifyComments(photo.comments) });
+                // embedFields.Add(new EmbedFieldBuilder { Name = "Filename", Value = photo.original_filename });
+                // embedFields.Add(new EmbedFieldBuilder { Name = "Comments", Value = StringifyComments(photo.comments) });
                 var embed = new EmbedBuilder()
                        .WithTitle("Hey look! It's Sofi!")
-                       .WithDescription("This is a photo of sofi")
+                    //    .WithDescription("This is a photo of sofi")
                        .WithFields(embedFields)
                        .WithColor(0x0000ff)
                        .WithImageUrl($"attachment://{fileName}")
